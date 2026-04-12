@@ -13,7 +13,7 @@ export default function AdUnit({ slot, format = "auto", style = {} }) {
         (window.adsbygoogle = window.adsbygoogle || []).push({});
       }
     } catch {
-      // Ad blockers can prevent ad rendering.
+      // Ad blockers can prevent ad rendering. sda
     }
   }, [enabled]);
 
