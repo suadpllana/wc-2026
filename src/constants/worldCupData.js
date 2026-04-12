@@ -9,12 +9,12 @@ export const ADSENSE_SLOTS = {
 };
 
 export const TABS = [
-  { id: "home", label: "Home" },
-  { id: "scores", label: "Fixtures" },
-  { id: "groups", label: "Groups" },
-  { id: "news", label: "News" },
-  { id: "scorers", label: "Top Scorers" },
-  { id: "about", label: "About" },
+  { id: "home", label: "Home", path: "home" },
+  { id: "scores", label: "Fixtures", path: "fixtures" },
+  { id: "groups", label: "Groups", path: "groups" },
+  { id: "news", label: "News", path: "news" },
+  { id: "scorers", label: "Top Scorers", path: "scorers" },
+  { id: "about", label: "About", path: "about" },
 ];
 
 export const GROUPS = {

@@ -13,8 +13,82 @@ import TeamDetailsTab from "./components/tabs/TeamDetailsTab";
 import { ADSENSE_CLIENT, ADSENSE_SLOTS, GROUPS, NEWS_FALLBACK, SCORERS, SCHEDULE, TABS } from "./constants/worldCupData";
 import { fetchDailyNews, fetchMatchNews, fetchTeamNews, fetchWorldCupTournamentData } from "./services/liveDataApi";
 
+const TAB_PATH_TO_ID = Object.fromEntries(TABS.map((tab) => [tab.path, tab.id]));
+const TAB_ID_TO_PATH = Object.fromEntries(TABS.map((tab) => [tab.id, tab.path]));
+
+function normalizeTabId(tabId) {
+  return tabId === "fixtures" ? "scores" : tabId;
+}
+
+function getMatchRouteKey(match) {
+  if (!match) return "";
+  if (match.id) return String(match.id);
+
+  return `${match.date}-${match.home?.name ?? ""}-${match.away?.name ?? ""}`
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+function buildHashRoute(path, query = "") {
+  return query ? `#/${path}?${query}` : `#/${path}`;
+}
+
+function getDefaultHashRoute() {
+  return buildHashRoute("home");
+}
+
+function parseHashRoute(hashValue) {
+  const normalizedHash = (hashValue || "").replace(/^#\/?/, "");
+
+  if (!normalizedHash) {
+    return { kind: "tab", tab: "home" };
+  }
+
+  const [pathPart, queryPart = ""] = normalizedHash.split("?");
+  const segments = pathPart.split("/").filter(Boolean);
+  const [root = "home", detail = ""] = segments;
+  const query = new URLSearchParams(queryPart);
+
+  if (root === "match") {
+    return {
+      kind: "match",
+      matchKey: decodeURIComponent(detail),
+      backRoute: query.get("back") ? decodeURIComponent(query.get("back")) : "fixtures",
+    };
+  }
+
+  if (root === "team") {
+    return {
+      kind: "team",
+      teamName: decodeURIComponent(detail),
+      backRoute: query.get("back") ? decodeURIComponent(query.get("back")) : "groups",
+    };
+  }
+
+  const tabId = normalizeTabId(TAB_PATH_TO_ID[root] ?? root);
+  return { kind: "tab", tab: TAB_ID_TO_PATH[tabId] ? tabId : "home" };
+}
+
+function getActiveTabFromRoute(route) {
+  if (route.kind === "tab") {
+    return route.tab;
+  }
+
+  const backRoot = (route.backRoute || "").split("/")[0];
+  if (backRoot === "match" || backRoot === "fixtures") {
+    return "scores";
+  }
+
+  if (backRoot === "team") {
+    return "groups";
+  }
+
+  return normalizeTabId(TAB_PATH_TO_ID[backRoot] ?? backRoot) || "home";
+}
+
 export default function WorldCup2026() {
-  const [activeTab, setActiveTab] = useState("home");
+  const [route, setRoute] = useState(() => parseHashRoute(window.location.hash));
   const [activeGroup, setActiveGroup] = useState("A");
   const [countdown, setCountdown] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
   const [groupsData, setGroupsData] = useState([]);
@@ -23,9 +97,6 @@ export default function WorldCup2026() {
   const [fixturesData, setFixturesData] = useState([]);
   const [fixturesLoading, setFixturesLoading] = useState(true);
   const [fixturesError, setFixturesError] = useState("");
-  const [selectedMatch, setSelectedMatch] = useState(null);
-  const [selectedTeam, setSelectedTeam] = useState(null);
-  const [teamBackTab, setTeamBackTab] = useState("scores");
   const [matchNews, setMatchNews] = useState([]);
   const [matchNewsLoading, setMatchNewsLoading] = useState(false);
   const [matchNewsError, setMatchNewsError] = useState("");
@@ -35,6 +106,24 @@ export default function WorldCup2026() {
   const [newsItems, setNewsItems] = useState([]);
   const [newsLoading, setNewsLoading] = useState(true);
   const [newsError, setNewsError] = useState("");
+
+  useEffect(() => {
+    const handleHashChange = () => {
+      setRoute(parseHashRoute(window.location.hash));
+    };
+
+    if (!window.location.hash) {
+      window.history.replaceState(null, "", getDefaultHashRoute());
+    }
+
+    handleHashChange();
+    window.addEventListener("hashchange", handleHashChange);
+    return () => window.removeEventListener("hashchange", handleHashChange);
+  }, []);
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [route]);
 
   useEffect(() => {
     if (!document.querySelector(`script[src*="${ADSENSE_CLIENT}"]`)) {
@@ -129,6 +218,33 @@ export default function WorldCup2026() {
 
   const groupCollection = groupsData.length > 0 ? groupsData : fallbackGroups;
   const groupMap = useMemo(() => Object.fromEntries(groupCollection.map((group) => [group.letter, group])), [groupCollection]);
+  const fixturesCollection = fixturesData.length > 0 ? fixturesData : SCHEDULE;
+  const activeTab = getActiveTabFromRoute(route);
+
+  const selectedMatch = useMemo(() => {
+    if (route.kind !== "match" || !route.matchKey) return null;
+
+    return fixturesCollection.find((fixture) => {
+      const routeKey = getMatchRouteKey(fixture);
+      return routeKey === route.matchKey || String(fixture.id ?? "") === route.matchKey;
+    }) ?? null;
+  }, [fixturesCollection, route]);
+
+  const selectedTeam = useMemo(() => {
+    if (route.kind !== "team" || !route.teamName) return null;
+
+    for (const group of groupCollection) {
+      const found = (group.teams || []).find((team) => team.name === route.teamName);
+      if (found) {
+        return found;
+      }
+    }
+
+    if (selectedMatch?.home?.name === route.teamName) return selectedMatch.home;
+    if (selectedMatch?.away?.name === route.teamName) return selectedMatch.away;
+
+    return null;
+  }, [groupCollection, route, selectedMatch]);
 
   useEffect(() => {
     if (!groupMap[activeGroup] && groupCollection.length > 0) {
@@ -137,7 +253,12 @@ export default function WorldCup2026() {
   }, [activeGroup, groupCollection, groupMap]);
 
   useEffect(() => {
-    if (!selectedMatch) return;
+    if (!selectedMatch) {
+      setMatchNews([]);
+      setMatchNewsError("");
+      setMatchNewsLoading(false);
+      return;
+    }
 
     let cancelled = false;
     const loadMatchNews = async () => {
@@ -163,7 +284,12 @@ export default function WorldCup2026() {
   }, [selectedMatch]);
 
   useEffect(() => {
-    if (!selectedTeam) return;
+    if (!selectedTeam) {
+      setTeamNews([]);
+      setTeamNewsError("");
+      setTeamNewsLoading(false);
+      return;
+    }
 
     let cancelled = false;
     const loadTeamNews = async () => {
@@ -189,25 +315,32 @@ export default function WorldCup2026() {
   }, [selectedTeam]);
 
   const featuredNews = newsItems.length > 0 ? newsItems.slice(0, 24) : NEWS_FALLBACK;
-  const fixturesCollection = fixturesData.length > 0 ? fixturesData : SCHEDULE;
 
   const getRecentTeamMatches = (teamName) => {
     if (!selectedMatch) return [];
     return fixturesCollection
-      .filter((fixture) => fixture.id !== selectedMatch.id)
+      .filter((fixture) => getMatchRouteKey(fixture) !== getMatchRouteKey(selectedMatch))
       .filter((fixture) => fixture.home.name === teamName || fixture.away.name === teamName)
       .slice(0, 5);
   };
 
   const openMatchDetails = (match) => {
-    setSelectedMatch(match);
-    setActiveTab("match");
+    if (!match) return;
+    const matchRouteKey = getMatchRouteKey(match);
+    window.location.hash = buildHashRoute(`match/${encodeURIComponent(matchRouteKey)}`, "back=fixtures");
   };
 
-  const openTeamDetails = (team, backTab = "scores") => {
-    setSelectedTeam(team);
-    setTeamBackTab(backTab);
-    setActiveTab("team");
+  const openTeamDetails = (team, backRoute = "groups") => {
+    if (!team?.name) return;
+    window.location.hash = buildHashRoute(`team/${encodeURIComponent(team.name)}`, `back=${encodeURIComponent(backRoute)}`);
+  };
+
+  const navigateToPath = (path) => {
+    window.location.hash = buildHashRoute(path);
+  };
+
+  const navigateToTab = (tabId) => {
+    navigateToPath(TAB_ID_TO_PATH[tabId] ?? "home");
   };
 
   const getTeamGroupInfo = (teamName) => {
@@ -235,13 +368,13 @@ export default function WorldCup2026() {
   };
 
   const renderActiveTab = () => {
-    if (activeTab === "home") {
+    if (route.kind === "tab" && activeTab === "home") {
       return (
         <HomeTab
           countdown={countdown}
-          onOpenFixtures={() => setActiveTab("scores")}
-          onOpenGroups={() => setActiveTab("groups")}
-          onOpenNews={() => setActiveTab("news")}
+          onOpenFixtures={() => navigateToTab("scores")}
+          onOpenGroups={() => navigateToTab("groups")}
+          onOpenNews={() => navigateToTab("news")}
           fixtures={fixturesCollection}
           featuredNews={featuredNews}
           newsError={newsError}
@@ -250,7 +383,7 @@ export default function WorldCup2026() {
       );
     }
 
-    if (activeTab === "scores") {
+    if (route.kind === "tab" && activeTab === "scores") {
       return (
         <ScoresTab
           fixtures={fixturesCollection}
@@ -261,13 +394,13 @@ export default function WorldCup2026() {
       );
     }
 
-    if (activeTab === "match") {
+    if (route.kind === "match") {
       return (
         <MatchDetailsTab
-          key={selectedMatch?.id || "match-details"}
+          key={getMatchRouteKey(selectedMatch) || route.matchKey || "match-details"}
           match={selectedMatch}
-          onBack={() => setActiveTab("scores")}
-          onOpenTeam={(team) => openTeamDetails(team, "match")}
+          onBack={() => navigateToPath(route.backRoute || "fixtures")}
+          onOpenTeam={(team) => openTeamDetails(team, `match/${getMatchRouteKey(selectedMatch)}`)}
           relatedNews={matchNews}
           matchNewsLoading={matchNewsLoading}
           matchNewsError={matchNewsError}
@@ -277,13 +410,15 @@ export default function WorldCup2026() {
       );
     }
 
-    if (activeTab === "team") {
-      const teamName = selectedTeam?.name || "";
+    if (route.kind === "team") {
+      const teamName = selectedTeam?.name || route.teamName || "";
       const { groupTitle, stats } = getTeamGroupInfo(teamName);
       return (
         <TeamDetailsTab
           team={selectedTeam}
-          onBack={() => setActiveTab(teamBackTab)}
+          onBack={() => {
+            navigateToPath(route.backRoute || "groups");
+          }}
           stats={stats}
           groupTitle={groupTitle}
           recentMatches={getTeamRecentMatches(teamName)}
@@ -295,7 +430,7 @@ export default function WorldCup2026() {
       );
     }
 
-    if (activeTab === "groups") {
+    if (route.kind === "tab" && activeTab === "groups") {
       return (
         <GroupsTab
           groupCollection={groupCollection}
@@ -309,15 +444,15 @@ export default function WorldCup2026() {
       );
     }
 
-    if (activeTab === "news") {
+    if (route.kind === "tab" && activeTab === "news") {
       return <NewsTab featuredNews={featuredNews} newsLoading={newsLoading} newsError={newsError} />;
     }
 
-    if (activeTab === "scorers") {
+    if (route.kind === "tab" && activeTab === "scorers") {
       return <ScorersTab scorers={SCORERS} />;
     }
 
-    if (activeTab === "about") {
+    if (route.kind === "tab" && activeTab === "about") {
       return <AboutTab />;
     }
 
@@ -330,7 +465,7 @@ export default function WorldCup2026() {
         <AdUnit slot={ADSENSE_SLOTS.TOP_BANNER} />
       </div>
 
-      <HeaderNav tabs={TABS} activeTab={activeTab} setActiveTab={setActiveTab} />
+      <HeaderNav tabs={TABS} activeTab={activeTab} />
 
       <main className="max-w-6xl mx-auto px-4 py-6">{renderActiveTab()}</main>
 

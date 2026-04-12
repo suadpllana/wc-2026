@@ -1,4 +1,4 @@
-export default function HeaderNav({ tabs, activeTab, setActiveTab }) {
+export default function HeaderNav({ tabs, activeTab }) {
   return (
     <header className="sticky top-0 z-50 bg-slate-950/95 backdrop-blur border-b border-slate-800">
       <div className="max-w-6xl mx-auto px-4">
@@ -15,13 +15,14 @@ export default function HeaderNav({ tabs, activeTab, setActiveTab }) {
           </div>
           <nav className="hidden md:flex items-center gap-1">
             {tabs.map((tab) => (
-              <button
+              <a
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
+                href={`#/${tab.path}`}
+                aria-current={activeTab === tab.id ? "page" : undefined}
                 className={`px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wide transition-all ${activeTab === tab.id ? "bg-yellow-400 text-slate-900" : "text-slate-400 hover:text-white hover:bg-slate-800"}`}
               >
                 {tab.label}
-              </button>
+              </a>
             ))}
           </nav>
           <span className="text-xs text-slate-500 hidden lg:block">🏆 USA · Canada · Mexico</span>
@@ -29,13 +30,14 @@ export default function HeaderNav({ tabs, activeTab, setActiveTab }) {
 
         <div className="flex md:hidden gap-1 pb-2 overflow-x-auto no-scrollbar">
           {tabs.map((tab) => (
-            <button
+            <a
               key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
+              href={`#/${tab.path}`}
+              aria-current={activeTab === tab.id ? "page" : undefined}
               className={`shrink-0 px-3 py-1 rounded-lg text-xs font-bold uppercase tracking-wide transition-all ${activeTab === tab.id ? "bg-yellow-400 text-slate-900" : "text-slate-400 hover:text-white bg-slate-800"}`}
             >
               {tab.label}
-            </button>
+            </a>
           ))}
         </div>
       </div>
