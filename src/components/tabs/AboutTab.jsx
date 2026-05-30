@@ -1,72 +1,64 @@
+import { Globe2, ShieldCheck } from "lucide-react";
 import AdUnit from "../AdUnit";
 import { ADSENSE_SLOTS } from "../../constants/worldCupData";
 
 export default function AboutTab() {
   return (
     <div className="space-y-6">
-      <section className="bg-slate-800 border border-slate-700 rounded-2xl p-6">
-        <h2 className="text-2xl font-black uppercase tracking-tight mb-2">About World Cup 2026</h2>
-        <p className="text-slate-300 text-sm leading-relaxed">
-          This platform tracks FIFA World Cup 2026 fixtures, group tables, teams, and live football stories in one place.
-          The tournament is hosted by USA, Canada, and Mexico with a 48-team format for the first time in history.
+      <section className="rounded-lg border border-white/10 bg-zinc-900 p-6">
+        <p className="mb-2 inline-flex items-center gap-2 rounded-md bg-emerald-300/10 px-2 py-1 text-xs font-black uppercase tracking-[0.18em] text-emerald-200">
+          <Globe2 className="h-3.5 w-3.5" aria-hidden="true" />
+          Tournament guide
+        </p>
+        <h2 className="text-2xl font-black tracking-tight text-white sm:text-3xl">About World Cup 2026</h2>
+        <p className="mt-3 max-w-3xl text-sm leading-relaxed text-zinc-400">
+          This platform tracks FIFA World Cup 2026 fixtures, group tables, teams, predictions, estimated odds, and football news in one place. The tournament is hosted by the USA, Canada, and Mexico with 48 teams and 104 matches.
         </p>
       </section>
 
       <AdUnit slot={ADSENSE_SLOTS.TAB_TOP_BANNER} />
 
+      <section className="grid gap-3 sm:grid-cols-3">
+        {[
+          { title: "48 teams", desc: "The largest men's World Cup field yet." },
+          { title: "3 host nations", desc: "The United States, Canada, and Mexico share hosting duties." },
+          { title: "104 matches", desc: "Group stage, Round of 32, and a larger knockout path." },
+        ].map((item) => (
+          <div key={item.title} className="rounded-lg border border-white/10 bg-zinc-900 p-4">
+            <p className="text-sm font-black text-amber-300">{item.title}</p>
+            <p className="mt-2 text-xs leading-relaxed text-zinc-400">{item.desc}</p>
+          </div>
+        ))}
+      </section>
+
       <section>
-        <h3 className="font-black text-base uppercase tracking-tight mb-3">Historic World Cup Classics</h3>
-        <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-3">
+        <h3 className="mb-3 text-lg font-black tracking-tight">Historic World Cup classics</h3>
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
           {[
-            { match: "Brazil 1-7 Germany", year: "2014 Semi-final", story: "The Mineirazo stunned the football world as Germany scored 5 in 29 minutes." },
-            { match: "Argentina 3-3 France (4-2 pens)", year: "2022 Final", story: "A final for the ages with a Mbappe hat-trick and Messi lifting the trophy." },
-            { match: "Italy 3-2 Brazil", year: "1982 Group Stage", story: "Paolo Rossi hat-trick in one of the greatest tactical battles ever played." },
-            { match: "England 4-2 West Germany", year: "1966 Final", story: "The only World Cup title for England, remembered for Geoff Hurst's hat-trick." },
-            { match: "Uruguay 2-1 Brazil", year: "1950 Final Round", story: "The Maracanazo remains one of the most dramatic shocks in football history." },
-            { match: "Netherlands 5-1 Spain", year: "2014 Group Stage", story: "Van Persie's flying header opened a dominant Dutch revenge performance." },
+            { match: "Brazil 1-7 Germany", year: "2014 Semi-final", story: "Germany stunned Brazil with five goals in the first half hour." },
+            { match: "Argentina 3-3 France", year: "2022 Final", story: "Messi and Mbappe delivered one of the most dramatic finals ever." },
+            { match: "Italy 3-2 Brazil", year: "1982 Group Stage", story: "Paolo Rossi's hat-trick decided a legendary tactical battle." },
+            { match: "England 4-2 West Germany", year: "1966 Final", story: "Geoff Hurst scored a final hat-trick as England won at Wembley." },
+            { match: "Uruguay 2-1 Brazil", year: "1950 Final Round", story: "The Maracanazo remains one of football's defining shocks." },
+            { match: "Netherlands 5-1 Spain", year: "2014 Group Stage", story: "The Dutch dismantled the reigning champions in Salvador." },
           ].map((item) => (
-            <article key={`${item.match}-${item.year}`} className="bg-slate-800 border border-slate-700 rounded-xl p-4">
-              <p className="text-xs uppercase tracking-wider text-yellow-400">{item.year}</p>
-              <h4 className="font-black text-sm mt-1 mb-2">{item.match}</h4>
-              <p className="text-xs text-slate-400 leading-relaxed">{item.story}</p>
+            <article key={`${item.match}-${item.year}`} className="rounded-lg border border-white/10 bg-zinc-900 p-4">
+              <p className="text-xs uppercase tracking-[0.18em] text-amber-300">{item.year}</p>
+              <h4 className="mb-2 mt-1 text-sm font-black text-white">{item.match}</h4>
+              <p className="text-xs leading-relaxed text-zinc-400">{item.story}</p>
             </article>
           ))}
         </div>
       </section>
 
-      <section>
-        <h3 className="font-black text-base uppercase tracking-tight mb-3">Records Broken in WC 2022</h3>
-        <div className="grid sm:grid-cols-2 gap-3">
-          {[
-            "Lionel Messi became the first player to score in every knockout round of a single World Cup.",
-            "Kylian Mbappe became the first man since 1966 to score a hat-trick in a World Cup final.",
-            "Morocco became the first African nation to reach a World Cup semi-final.",
-            "The 2022 final became the highest-scoring World Cup final since 1966.",
-            "Argentina lifted a third World Cup title after a 36-year wait.",
-            "Qatar 2022 delivered one of the biggest upset catalogs in modern tournament history.",
-          ].map((record) => (
-            <div key={record} className="bg-slate-800 border border-slate-700 rounded-xl p-4 flex gap-2">
-              <span className="text-yellow-400">•</span>
-              <p className="text-xs text-slate-300 leading-relaxed">{record}</p>
-            </div>
-          ))}
+      <section className="rounded-lg border border-white/10 bg-zinc-900 p-5">
+        <div className="mb-3 flex items-center gap-2">
+          <ShieldCheck className="h-5 w-5 text-emerald-300" aria-hidden="true" />
+          <h3 className="text-lg font-black tracking-tight">Editorial and betting disclosure</h3>
         </div>
-      </section>
-
-      <section className="bg-slate-800 border border-slate-700 rounded-2xl p-6">
-        <h3 className="font-black text-base uppercase tracking-tight mb-4">What Makes 2026 Unique</h3>
-        <div className="grid sm:grid-cols-3 gap-3">
-          {[
-            { title: "48 Teams", desc: "Biggest World Cup ever with more continents represented." },
-            { title: "3 Host Nations", desc: "First tournament co-hosted by USA, Canada, and Mexico." },
-            { title: "104 Matches", desc: "Expanded format creates more stories, rivalries, and underdog runs." },
-          ].map((item) => (
-            <div key={item.title} className="bg-slate-700/40 border border-slate-700 rounded-xl p-4">
-              <p className="text-yellow-400 font-black text-sm mb-1">{item.title}</p>
-              <p className="text-xs text-slate-300 leading-relaxed">{item.desc}</p>
-            </div>
-          ))}
-        </div>
+        <p className="text-sm leading-relaxed text-zinc-400">
+          Predictions and odds are model estimates for editorial use. Sponsored betting links are marked as sponsored, may use affiliate URLs, and are intended only for adults in places where online betting is legal.
+        </p>
       </section>
 
       <AdUnit slot={ADSENSE_SLOTS.TAB_BOTTOM_RECTANGLE} format="rectangle" />

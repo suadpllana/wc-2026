@@ -1,45 +1,92 @@
-export default function HeaderNav({ tabs, activeTab }) {
+import { BarChart3, CalendarDays, Home, Newspaper, Sparkles, Table2, Trophy } from "lucide-react";
+
+const tabIcons = {
+  home: Home,
+  scores: CalendarDays,
+  predictions: Sparkles,
+  groups: Table2,
+  news: Newspaper,
+  scorers: BarChart3,
+  about: Trophy,
+};
+
+function toHref(path) {
+  return path ? `/${path}` : "/";
+}
+
+export default function HeaderNav({ tabs, activeTab, onNavigate }) {
   return (
-    <header className="sticky top-0 z-50 bg-slate-950/95 backdrop-blur border-b border-slate-800">
-      <div className="max-w-6xl mx-auto px-4">
-        <div className="flex items-center justify-between h-14">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "linear-gradient(135deg, #facc15, #f59e0b)" }}>
-              <span className="text-slate-900 font-black text-xs">WC</span>
-            </div>
-            <div>
-              <span className="font-black text-white text-sm tracking-tight">WORLD CUP</span>
-              <span className="text-yellow-400 font-black text-sm ml-1">2026</span>
-            </div>
-            <span className="hidden sm:block text-xs bg-red-500 text-white px-2 py-0.5 rounded-full font-bold animate-pulse">COUNTDOWN</span>
-          </div>
-          <nav className="hidden md:flex items-center gap-1">
-            {tabs.map((tab) => (
-              <a
-                key={tab.id}
-                href={`#/${tab.path}`}
-                aria-current={activeTab === tab.id ? "page" : undefined}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wide transition-all ${activeTab === tab.id ? "bg-yellow-400 text-slate-900" : "text-slate-400 hover:text-white hover:bg-slate-800"}`}
-              >
-                {tab.label}
-              </a>
-            ))}
+    <header className="sticky top-0 z-50 border-b border-white/10 bg-zinc-950/92 backdrop-blur-xl">
+      <div className="mx-auto max-w-7xl px-4">
+        <div className="flex min-h-16 items-center justify-between gap-4">
+          <a
+            href="/"
+            onClick={(event) => {
+              event.preventDefault();
+              onNavigate?.("");
+            }}
+            className="flex items-center gap-3"
+          >
+            <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-300 via-amber-300 to-rose-400 text-zinc-950 shadow-lg shadow-amber-950/20">
+              <Trophy className="h-5 w-5" aria-hidden="true" />
+            </span>
+            <span>
+              <span className="block text-sm font-black uppercase tracking-wide text-white">WC2026.live</span>
+              <span className="block text-[11px] font-semibold uppercase tracking-[0.2em] text-zinc-500">Fixtures, odds, news</span>
+            </span>
+          </a>
+
+          <nav className="hidden items-center gap-1 lg:flex">
+            {tabs.map((tab) => {
+              const Icon = tabIcons[tab.id] || Trophy;
+              return (
+                <a
+                  key={tab.id}
+                  href={toHref(tab.path)}
+                  onClick={(event) => {
+                    event.preventDefault();
+                    onNavigate?.(tab.path);
+                  }}
+                  aria-current={activeTab === tab.id ? "page" : undefined}
+                  className={`inline-flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-black uppercase tracking-wide transition ${
+                    activeTab === tab.id ? "bg-amber-300 text-zinc-950" : "text-zinc-400 hover:bg-white/5 hover:text-white"
+                  }`}
+                >
+                  <Icon className="h-3.5 w-3.5" aria-hidden="true" />
+                  {tab.label}
+                </a>
+              );
+            })}
           </nav>
-          <span className="text-xs text-slate-500 hidden lg:block">🏆 USA · Canada · Mexico</span>
+
+          <div className="hidden items-center gap-2 rounded-lg border border-emerald-300/20 bg-emerald-300/10 px-3 py-2 text-xs font-bold text-emerald-200 md:flex">
+            <span className="h-2 w-2 rounded-full bg-emerald-300" />
+            104 matches
+          </div>
         </div>
 
-        <div className="flex md:hidden gap-1 pb-2 overflow-x-auto no-scrollbar">
-          {tabs.map((tab) => (
-            <a
-              key={tab.id}
-              href={`#/${tab.path}`}
-              aria-current={activeTab === tab.id ? "page" : undefined}
-              className={`shrink-0 px-3 py-1 rounded-lg text-xs font-bold uppercase tracking-wide transition-all ${activeTab === tab.id ? "bg-yellow-400 text-slate-900" : "text-slate-400 hover:text-white bg-slate-800"}`}
-            >
-              {tab.label}
-            </a>
-          ))}
-        </div>
+        <nav className="-mx-1 flex gap-1 overflow-x-auto pb-3 no-scrollbar lg:hidden">
+          {tabs.map((tab) => {
+            const Icon = tabIcons[tab.id] || Trophy;
+            return (
+              <a
+                key={tab.id}
+                href={toHref(tab.path)}
+                onClick={(event) => {
+                  event.preventDefault();
+                  onNavigate?.(tab.path);
+                }}
+                aria-current={activeTab === tab.id ? "page" : undefined}
+                className={`inline-flex shrink-0 items-center gap-2 rounded-lg px-3 py-2 text-xs font-black uppercase tracking-wide transition ${
+                  activeTab === tab.id ? "bg-amber-300 text-zinc-950" : "bg-white/5 text-zinc-400 hover:text-white"
+                }`}
+              >
+                <Icon className="h-3.5 w-3.5" aria-hidden="true" />
+                {tab.label}
+              </a>
+            );
+          })}
+        </nav>
       </div>
     </header>
   );

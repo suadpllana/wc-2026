@@ -1,41 +1,48 @@
+import { Trophy } from "lucide-react";
+
 export default function Footer() {
   return (
-    <footer className="border-t border-slate-800 mt-12 py-10 bg-slate-900">
-      <div className="max-w-6xl mx-auto px-4">
-        <div className="grid sm:grid-cols-4 gap-8 mb-8">
+    <footer className="mt-14 border-t border-white/10 bg-zinc-950 py-10">
+      <div className="mx-auto max-w-7xl px-4">
+        <div className="grid gap-8 md:grid-cols-[1.4fr_1fr_1fr_1fr]">
           <div>
-            <div className="flex items-center gap-2 mb-3">
-              <div className="w-6 h-6 rounded flex items-center justify-center" style={{ background: "linear-gradient(135deg, #facc15, #f59e0b)" }}>
-                <span className="text-slate-900 font-black text-xs">W</span>
-              </div>
+            <div className="mb-3 flex items-center gap-2">
+              <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-300 text-zinc-950">
+                <Trophy className="h-4 w-4" aria-hidden="true" />
+              </span>
               <span className="font-black text-white">WC2026.live</span>
             </div>
-            <p className="text-slate-500 text-xs leading-relaxed">Your #1 source for 2026 FIFA World Cup live scores, standings, and news. Updated in real-time.</p>
+            <p className="max-w-sm text-sm leading-relaxed text-zinc-400">
+              Fixtures, group tables, match predictions, estimated 1X2 odds, and World Cup 2026 news in one fast fan dashboard.
+            </p>
+            <p className="mt-3 text-xs leading-relaxed text-zinc-600">
+              Not affiliated with FIFA. Betting content is informational, 18+ only, and subject to local law.
+            </p>
           </div>
+
           {[
-            { title: "Tournament", links: ["Live Scores", "Group Standings", "Match Schedule", "Top Scorers", "Team Profiles"] },
-            { title: "Information", links: ["Venues & Cities", "Host Countries", "History & Records", "About WC2026", "FAQ"] },
-            { title: "Follow", links: ["Latest News", "Match Previews", "Expert Analysis", "Bracket Predictor", "Fantasy Football"] },
-          ].map((col) => (
-            <div key={col.title}>
-              <h4 className="font-black text-xs uppercase tracking-widest text-yellow-400 mb-3">{col.title}</h4>
+            { title: "Tournament", links: [["Fixtures", "/fixtures"], ["Predictions", "/predictions"], ["Groups", "/groups"], ["Top Scorers", "/scorers"]] },
+            { title: "Coverage", links: [["Latest News", "/news"], ["Match Previews", "/predictions"], ["Team Pages", "/groups"], ["About", "/about"]] },
+            { title: "Legal", links: [["Privacy Policy", "/about"], ["Terms", "/about"], ["Contact", "/about"], ["Sitemap", "/sitemap.xml"]] },
+          ].map((column) => (
+            <div key={column.title}>
+              <h4 className="mb-3 text-xs font-black uppercase tracking-[0.2em] text-amber-300">{column.title}</h4>
               <ul className="space-y-2">
-                {col.links.map((link) => (
-                  <li key={link}>
-                    <a href="#" className="text-slate-400 hover:text-white text-xs transition-colors">{link}</a>
+                {column.links.map(([label, href]) => (
+                  <li key={label}>
+                    <a href={href} className="text-sm text-zinc-500 transition hover:text-white">
+                      {label}
+                    </a>
                   </li>
                 ))}
               </ul>
             </div>
           ))}
         </div>
-        <div className="border-t border-slate-800 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <p className="text-slate-600 text-xs">© 2026 WC2026.live - Not affiliated with FIFA. Fan site for informational purposes.</p>
-          <div className="flex gap-4">
-            {["Privacy Policy", "Terms of Use", "Contact", "Sitemap"].map((link) => (
-              <a key={link} href="#" className="text-slate-600 hover:text-slate-400 text-xs transition-colors">{link}</a>
-            ))}
-          </div>
+
+        <div className="mt-8 flex flex-col gap-3 border-t border-white/10 pt-6 text-xs text-zinc-600 sm:flex-row sm:items-center sm:justify-between">
+          <p>Copyright 2026 WC2026.live. All rights reserved.</p>
+          <p>Odds are model estimates, not live sportsbook prices.</p>
         </div>
       </div>
     </footer>

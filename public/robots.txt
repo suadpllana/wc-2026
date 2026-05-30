@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://wc2026.live/sitemap.xml

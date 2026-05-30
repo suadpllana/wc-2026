@@ -13,7 +13,7 @@ export default function AdUnit({ slot, format = "auto", style = {} }) {
         (window.adsbygoogle = window.adsbygoogle || []).push({});
       }
     } catch {
-      // Ad blockers can prevent ad rendering. sda
+      // Ad blockers can prevent ad rendering.
     }
   }, [enabled]);
 
@@ -22,7 +22,7 @@ export default function AdUnit({ slot, format = "auto", style = {} }) {
   }
 
   return (
-    <div ref={ref} className="w-full overflow-hidden rounded-lg" style={{ minHeight: 80, ...style }}>
+    <div ref={ref} className="w-full overflow-hidden rounded-lg border border-white/5 bg-zinc-900/50" style={{ minHeight: 80, ...style }}>
       <ins
         className="adsbygoogle"
         style={{ display: "block", width: "100%", minHeight: 80 }}

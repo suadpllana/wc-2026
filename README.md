@@ -1,16 +1,28 @@
-# React + Vite
+# WC2026.live
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React/Vite World Cup 2026 dashboard with fixtures, groups, team pages, news, match predictions, estimated 1X2 odds, AdSense slots, and sponsored betting links.
 
-Currently, two official plugins are available:
+## Development
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+```bash
+npm install
+npm run dev
+```
 
-## React Compiler
+## Monetization
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Create a local `.env` file with your real publisher and affiliate values:
 
-## Expanding the ESLint configuration
+```bash
+VITE_ADSENSE_CLIENT=ca-pub-your-google-publisher-id
+VITE_ADSENSE_SLOT_TOP_BANNER=your-slot-id
+VITE_ADSENSE_SLOT_HOME_MID_RECTANGLE=your-slot-id
+VITE_ADSENSE_SLOT_HOME_BOTTOM_RECTANGLE=your-slot-id
+VITE_ADSENSE_SLOT_TAB_TOP_BANNER=your-slot-id
+VITE_ADSENSE_SLOT_TAB_BOTTOM_RECTANGLE=your-slot-id
+VITE_ADSENSE_SLOT_PREDICTIONS_IN_ARTICLE=your-slot-id
+VITE_STAKE_AFFILIATE_URL=https://stake.com/?c=your-code
+VITE_1XBET_AFFILIATE_URL=https://1xbet.com/?tag=your-code
+```
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+Ad links must comply with Google AdSense policies, sportsbook affiliate terms, and local gambling laws. The app labels betting links as sponsored and includes 18+ responsible gambling messaging.

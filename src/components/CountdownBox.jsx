@@ -1,10 +1,10 @@
 export default function CountdownBox({ value, label }) {
   return (
-    <div className="flex flex-col items-center">
-      <div className="bg-slate-800 border border-slate-700 rounded-xl w-20 h-20 flex items-center justify-center mb-2">
-        <span className="text-4xl font-black text-yellow-400 tabular-nums leading-none">{String(value).padStart(2, "0")}</span>
+    <div className="flex min-w-16 flex-col items-center">
+      <div className="mb-2 flex h-16 w-16 items-center justify-center rounded-lg border border-white/10 bg-zinc-950/70 sm:h-20 sm:w-20">
+        <span className="text-2xl font-black leading-none text-amber-300 tabular-nums sm:text-4xl">{String(value).padStart(2, "0")}</span>
       </div>
-      <span className="text-xs text-slate-400 uppercase tracking-widest font-semibold">{label}</span>
+      <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-zinc-500 sm:text-xs">{label}</span>
     </div>
   );
 }

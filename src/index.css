@@ -1,6 +1,42 @@
 @import "tailwindcss";
 
-.flag-emoji {
-	font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
-	line-height: 1;
+html {
+	background: #090a0f;
+	scroll-behavior: smooth;
+}
+
+body {
+	margin: 0;
+	background: #090a0f;
+}
+
+button,
+a,
+input,
+select {
+	font: inherit;
+}
+
+button {
+	cursor: pointer;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible {
+	outline: 2px solid #fcd34d;
+	outline-offset: 3px;
+}
+
+::selection {
+	background: rgba(252, 211, 77, 0.35);
+}
+
+.no-scrollbar {
+	scrollbar-width: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+	display: none;
 }

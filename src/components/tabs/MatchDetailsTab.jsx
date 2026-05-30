@@ -1,48 +1,14 @@
 import { useState } from "react";
+import { ArrowLeft, ExternalLink, Sparkles, Users } from "lucide-react";
 import AdUnit from "../AdUnit";
+import BettingSponsors from "../BettingSponsors";
+import TeamFlag from "../TeamFlag";
 import { ADSENSE_SLOTS } from "../../constants/worldCupData";
-
-const EXPECTED_LINEUPS = {
-  Mexico: ["Ochoa", "Sanchez", "Montes", "Vasquez", "Gallardo", "Alvarez", "Chavez", "Pineda", "Lozano", "Martin", "Quinones"],
-  "South Africa": ["Williams", "Mudau", "Mvala", "Kekana", "Modiba", "Mokoena", "Adams", "Tau", "Maseko", "Zwane", "Lepasa"],
-  Brazil: ["Alisson", "Danilo", "Marquinhos", "Militao", "Arana", "Bruno Guimaraes", "Paqueta", "Rodrygo", "Neymar", "Vinicius Jr.", "Endrick"],
-  England: ["Pickford", "Walker", "Stones", "Guehi", "Shaw", "Rice", "Bellingham", "Saka", "Foden", "Rashford", "Kane"],
-  Argentina: ["Martinez", "Molina", "Romero", "Otamendi", "Tagliafico", "De Paul", "Enzo Fernandez", "Mac Allister", "Di Maria", "Alvarez", "Messi"],
-};
-
-function TeamFlag({ team }) {
-  if (team.flagUrl) {
-    return <img src={team.flagUrl} alt={team.name} className="w-7 h-7 rounded-full object-cover" loading="lazy" />;
-  }
-  return <span className="flag-emoji text-2xl">{team.flag ?? "🏳️"}</span>;
-}
-
-function LineupCard({ team, onOpenTeam }) {
-  const players = EXPECTED_LINEUPS[team.name] ?? [];
-
-  return (
-    <div className="bg-slate-800 border border-slate-700 rounded-xl p-4">
-      <div className="flex items-center gap-2 mb-3">
-        <TeamFlag team={team} />
-        <button onClick={() => onOpenTeam?.(team)} className="font-black text-sm uppercase tracking-wide text-left hover:text-yellow-400 transition-colors">{team.name}</button>
-      </div>
-      {players.length > 0 ? (
-        <div className="grid grid-cols-2 gap-1.5">
-          {players.map((player) => (
-            <p key={player} className="text-xs text-slate-300">• {player}</p>
-          ))}
-        </div>
-      ) : (
-        <p className="text-xs text-slate-400">Expected lineup not published yet.</p>
-      )}
-    </div>
-  );
-}
+import { getMatchPrediction } from "../../utils/predictions";
 
 function buildPredictionKey(match) {
   if (!match) return "";
-  const idPart = match.id || `${match.home.name}-${match.away.name}-${match.date}`;
-  return `wc2026-prediction-${String(idPart).toLowerCase()}`;
+  return `wc2026-fan-prediction-${String(match.id || `${match.home.name}-${match.away.name}-${match.date}`).toLowerCase()}`;
 }
 
 function getInitialPredictionState(match) {
@@ -64,17 +30,59 @@ function getInitialPredictionState(match) {
     // Ignore localStorage read issues.
   }
 
+  const model = getMatchPrediction(match);
   return {
-    home: 34 + Math.floor(Math.random() * 12),
-    draw: 20 + Math.floor(Math.random() * 10),
-    away: 28 + Math.floor(Math.random() * 14),
+    home: Math.max(1, model?.probabilities.home ?? 34),
+    draw: Math.max(1, model?.probabilities.draw ?? 28),
+    away: Math.max(1, model?.probabilities.away ?? 34),
     voted: "",
   };
+}
+
+function OddsBox({ label, team, odds, probability }) {
+  return (
+    <div className="rounded-lg border border-white/10 bg-zinc-950/70 p-3">
+      <p className="text-[10px] font-black uppercase tracking-[0.18em] text-zinc-500">{label}</p>
+      <p className="mt-1 truncate text-xs font-bold text-zinc-300">{team}</p>
+      <div className="mt-2 flex items-end justify-between gap-2">
+        <p className="text-2xl font-black text-amber-300 tabular-nums">{odds}</p>
+        <p className="text-xs font-bold text-zinc-500">{probability}%</p>
+      </div>
+    </div>
+  );
+}
+
+function TeamButton({ team, onOpenTeam, align = "left" }) {
+  return (
+    <button
+      type="button"
+      onClick={() => onOpenTeam?.(team)}
+      className={`group min-w-0 ${align === "right" ? "text-right" : "text-left"}`}
+    >
+      <span className={`mb-3 flex ${align === "right" ? "justify-end" : "justify-start"}`}>
+        <TeamFlag team={team} size="xl" />
+      </span>
+      <span className="block truncate text-2xl font-black text-white transition group-hover:text-amber-300 sm:text-4xl">{team.name}</span>
+    </button>
+  );
 }
 
 export default function MatchDetailsTab({ match, onBack, relatedNews, matchNewsLoading, matchNewsError, recentHomeMatches, recentAwayMatches, onOpenTeam }) {
   const predictionKey = buildPredictionKey(match);
   const [predictionState, setPredictionState] = useState(() => getInitialPredictionState(match));
+
+  if (!match) {
+    return (
+      <div className="space-y-4">
+        <p className="text-sm text-zinc-400">No match selected.</p>
+        <button type="button" onClick={onBack} className="rounded-lg bg-amber-300 px-4 py-2 text-xs font-black uppercase tracking-wide text-zinc-950">
+          Back to fixtures
+        </button>
+      </div>
+    );
+  }
+
+  const modelPrediction = getMatchPrediction(match);
 
   const persistPrediction = (nextState) => {
     setPredictionState(nextState);
@@ -100,102 +108,110 @@ export default function MatchDetailsTab({ match, onBack, relatedNews, matchNewsL
   };
 
   const totalVotes = Math.max(1, predictionState.home + predictionState.draw + predictionState.away);
-  const homePct = Math.round((predictionState.home / totalVotes) * 100);
-  const drawPct = Math.round((predictionState.draw / totalVotes) * 100);
-  const awayPct = Math.round((predictionState.away / totalVotes) * 100);
-
-  if (!match) {
-    return (
-      <div className="space-y-4">
-        <p className="text-sm text-slate-400">No match selected.</p>
-        <button onClick={onBack} className="px-4 py-2 rounded-lg bg-yellow-400 text-slate-900 font-bold text-xs uppercase tracking-wide">Back to Fixtures</button>
-      </div>
-    );
-  }
+  const fanOptions = [
+    { id: "home", label: match.home.name, votes: predictionState.home, pct: Math.round((predictionState.home / totalVotes) * 100) },
+    { id: "draw", label: "Draw", votes: predictionState.draw, pct: Math.round((predictionState.draw / totalVotes) * 100) },
+    { id: "away", label: match.away.name, votes: predictionState.away, pct: Math.round((predictionState.away / totalVotes) * 100) },
+  ];
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between gap-3">
-        <button onClick={onBack} className="px-3 py-1.5 rounded-lg border border-slate-600 text-slate-200 text-xs font-bold uppercase tracking-wide hover:bg-slate-800">
-          ← Back to Fixtures
+        <button
+          type="button"
+          onClick={onBack}
+          className="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs font-black uppercase tracking-wide text-zinc-200 transition hover:border-amber-300/60"
+        >
+          <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+          Back
         </button>
-        <span className="text-xs text-slate-400">Match Details</span>
+        <span className="rounded-md bg-white/5 px-2 py-1 text-xs font-bold text-zinc-500">Match #{match.matchNumber}</span>
       </div>
 
-      <div className="bg-slate-800 border border-slate-700 rounded-2xl p-6">
-        <div className="flex items-center justify-center gap-4 sm:gap-8">
-          <div className="flex items-center gap-2 sm:gap-3">
-            <TeamFlag team={match.home} />
-            <button onClick={() => onOpenTeam?.(match.home)} className="font-black text-base sm:text-lg hover:text-yellow-400 transition-colors">{match.home.name}</button>
+      <section className="rounded-lg border border-white/10 bg-zinc-900 p-5">
+        <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3 sm:gap-6">
+          <TeamButton team={match.home} onOpenTeam={onOpenTeam} />
+          <div className="text-center">
+            <div className="rounded-xl bg-amber-300 px-4 py-3 text-zinc-950">
+              <p className="text-lg font-black">{match.score ?? "vs"}</p>
+              <p className="text-[10px] font-black uppercase tracking-[0.18em] opacity-70">{match.status ?? "Scheduled"}</p>
+            </div>
           </div>
-          <div className="px-3 py-2 rounded-lg bg-slate-700 text-center">
-            <p className="font-black text-sm text-yellow-400">{match.score ?? "vs"}</p>
-            <p className="text-[10px] text-slate-400 uppercase tracking-wide">{match.status ?? "Scheduled"}</p>
-          </div>
-          <div className="flex items-center gap-2 sm:gap-3">
-            <TeamFlag team={match.away} />
-            <button onClick={() => onOpenTeam?.(match.away)} className="font-black text-base sm:text-lg hover:text-yellow-400 transition-colors">{match.away.name}</button>
-          </div>
+          <TeamButton team={match.away} onOpenTeam={onOpenTeam} align="right" />
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-5">
+        <div className="mt-6 grid gap-3 sm:grid-cols-4">
           {[
             { label: "Date", value: match.date },
             { label: "Time", value: match.time },
-            { label: "Stage", value: match.group ?? match.round },
+            { label: "Stage", value: match.group || match.round },
             { label: "Venue", value: `${match.venue}, ${match.city}` },
           ].map((item) => (
-            <div key={item.label} className="bg-slate-700/40 border border-slate-700 rounded-lg p-3">
-              <p className="text-[10px] uppercase tracking-wider text-slate-500">{item.label}</p>
-              <p className="text-xs text-slate-200 mt-1">{item.value}</p>
+            <div key={item.label} className="rounded-lg border border-white/10 bg-zinc-950/70 p-3">
+              <p className="text-[10px] uppercase tracking-[0.18em] text-zinc-500">{item.label}</p>
+              <p className="mt-1 text-sm font-bold text-zinc-200">{item.value}</p>
             </div>
           ))}
         </div>
-      </div>
+      </section>
 
       <AdUnit slot={ADSENSE_SLOTS.TAB_TOP_BANNER} />
 
-      <section>
-        <h3 className="font-black text-base uppercase tracking-tight mb-3">Expected Lineups</h3>
-        <div className="grid sm:grid-cols-2 gap-3">
-          <LineupCard team={match.home} onOpenTeam={onOpenTeam} />
-          <LineupCard team={match.away} onOpenTeam={onOpenTeam} />
+      <section className="grid gap-4 lg:grid-cols-[1fr_320px]">
+        <div className="rounded-lg border border-white/10 bg-zinc-900 p-5">
+          <div className="mb-4 flex items-center gap-2">
+            <Sparkles className="h-5 w-5 text-amber-300" aria-hidden="true" />
+            <h3 className="text-lg font-black tracking-tight">Prediction and estimated 1X2 odds</h3>
+          </div>
+
+          <div className="mb-4 grid grid-cols-3 gap-2">
+            <OddsBox label="1" team={match.home.name} odds={modelPrediction.odds.home} probability={modelPrediction.probabilities.home} />
+            <OddsBox label="X" team="Draw" odds={modelPrediction.odds.draw} probability={modelPrediction.probabilities.draw} />
+            <OddsBox label="2" team={match.away.name} odds={modelPrediction.odds.away} probability={modelPrediction.probabilities.away} />
+          </div>
+
+          <div className="rounded-lg border border-white/10 bg-zinc-950/70 p-4">
+            <div className="mb-3 flex flex-wrap gap-2">
+              <span className="rounded-md bg-emerald-300/10 px-2 py-1 text-xs font-black text-emerald-200">{modelPrediction.primaryPick}</span>
+              <span className="rounded-md bg-sky-300/10 px-2 py-1 text-xs font-black text-sky-200">{modelPrediction.bttsPick}</span>
+            </div>
+            <p className="text-sm leading-relaxed text-zinc-400">{modelPrediction.explanation}</p>
+          </div>
         </div>
+
+        <BettingSponsors compact />
       </section>
 
-      <section className="bg-slate-800 border border-slate-700 rounded-2xl p-5">
-        <h3 className="font-black text-base uppercase tracking-tight mb-3">Fan Prediction</h3>
-        <p className="text-xs text-slate-400 mb-3">Who do you think will win this match?</p>
+      <section className="rounded-lg border border-white/10 bg-zinc-900 p-5">
+        <div className="mb-4 flex items-center gap-2">
+          <Users className="h-5 w-5 text-emerald-300" aria-hidden="true" />
+          <h3 className="text-lg font-black tracking-tight">Fan prediction</h3>
+        </div>
 
-        <div className="grid sm:grid-cols-3 gap-2 mb-4">
-          {[
-            { id: "home", label: match.home.name },
-            { id: "draw", label: "Draw" },
-            { id: "away", label: match.away.name },
-          ].map((option) => (
+        <div className="mb-4 grid gap-2 sm:grid-cols-3">
+          {fanOptions.map((option) => (
             <button
               key={option.id}
+              type="button"
               onClick={() => submitPrediction(option.id)}
-              className={`px-3 py-2 rounded-lg border text-xs font-black uppercase tracking-wide transition-all ${predictionState.voted === option.id ? "bg-yellow-400 text-slate-900 border-yellow-400" : "bg-slate-700/50 text-slate-200 border-slate-600 hover:border-yellow-400/50"}`}
+              className={`rounded-lg border px-3 py-3 text-xs font-black uppercase tracking-wide transition ${
+                predictionState.voted === option.id ? "border-amber-300 bg-amber-300 text-zinc-950" : "border-white/10 bg-zinc-950 text-zinc-200 hover:border-amber-300/60"
+              }`}
             >
               {option.label}
             </button>
           ))}
         </div>
 
-        <div className="space-y-2">
-          {[
-            { label: match.home.name, votes: predictionState.home, pct: homePct },
-            { label: "Draw", votes: predictionState.draw, pct: drawPct },
-            { label: match.away.name, votes: predictionState.away, pct: awayPct },
-          ].map((item) => (
+        <div className="space-y-3">
+          {fanOptions.map((item) => (
             <div key={item.label}>
-              <div className="flex items-center justify-between text-xs text-slate-300 mb-1">
+              <div className="mb-1 flex items-center justify-between text-xs text-zinc-300">
                 <span>{item.label}</span>
                 <span>{item.pct}% ({item.votes})</span>
               </div>
-              <div className="h-2 rounded-full bg-slate-700 overflow-hidden">
-                <div className="h-full bg-yellow-400" style={{ width: `${item.pct}%` }} />
+              <div className="h-2 overflow-hidden rounded-full bg-zinc-800">
+                <div className="h-full bg-amber-300" style={{ width: `${item.pct}%` }} />
               </div>
             </div>
           ))}
@@ -203,46 +219,45 @@ export default function MatchDetailsTab({ match, onBack, relatedNews, matchNewsL
       </section>
 
       <section>
-        <h3 className="font-black text-base uppercase tracking-tight mb-3">Recent Form</h3>
-        <div className="grid sm:grid-cols-2 gap-3">
-          <div className="bg-slate-800 border border-slate-700 rounded-xl p-4">
-            <p className="text-xs uppercase tracking-widest text-yellow-400 mb-2">{match.home.name} recent fixtures</p>
-            {(recentHomeMatches.length > 0 ? recentHomeMatches : [match]).map((item) => (
-              <p key={item.id} className="text-xs text-slate-300 mb-1">{item.date} • {item.home.name} {item.score} {item.away.name}</p>
-            ))}
-          </div>
-          <div className="bg-slate-800 border border-slate-700 rounded-xl p-4">
-            <p className="text-xs uppercase tracking-widest text-yellow-400 mb-2">{match.away.name} recent fixtures</p>
-            {(recentAwayMatches.length > 0 ? recentAwayMatches : [match]).map((item) => (
-              <p key={item.id} className="text-xs text-slate-300 mb-1">{item.date} • {item.home.name} {item.score} {item.away.name}</p>
-            ))}
-          </div>
+        <h3 className="mb-3 text-lg font-black tracking-tight">Team fixture context</h3>
+        <div className="grid gap-3 sm:grid-cols-2">
+          {[
+            [match.home.name, recentHomeMatches],
+            [match.away.name, recentAwayMatches],
+          ].map(([teamName, matches]) => (
+            <div key={teamName} className="rounded-lg border border-white/10 bg-zinc-900 p-4">
+              <p className="mb-3 text-xs font-black uppercase tracking-[0.18em] text-amber-300">{teamName}</p>
+              {(matches.length > 0 ? matches : [match]).slice(0, 5).map((item) => (
+                <p key={item.id} className="mb-1 text-xs text-zinc-400">
+                  {item.date}: {item.home.name} {item.score} {item.away.name}
+                </p>
+              ))}
+            </div>
+          ))}
         </div>
       </section>
 
       <section>
-        <h3 className="font-black text-base uppercase tracking-tight mb-3">Match News</h3>
-        {matchNewsError && <p className="text-xs text-amber-300 mb-3">{matchNewsError}</p>}
-        <div className="grid sm:grid-cols-2 gap-3">
+        <h3 className="mb-3 text-lg font-black tracking-tight">Match news</h3>
+        {matchNewsError && <p className="mb-3 rounded-lg border border-amber-300/20 bg-amber-300/10 px-4 py-3 text-xs text-amber-100">{matchNewsError}</p>}
+        <div className="grid gap-3 sm:grid-cols-2">
           {relatedNews.map((item, index) => (
-            <article key={`${item.title}-${index}`} className="bg-slate-800 border border-slate-700 rounded-xl p-4">
-              <div className="flex items-start gap-3">
-                <span className="text-xl">{item.emoji}</span>
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="text-xs font-black text-yellow-400 bg-yellow-400/10 px-2 py-0.5 rounded">{item.tag}</span>
-                    <span className="text-xs text-slate-500">{item.time}</span>
-                  </div>
-                  <h4 className="font-bold text-sm leading-snug text-white">{item.title}</h4>
-                  <p className="text-xs text-slate-500 mt-1 mb-2">{item.source}</p>
-                  <a href={item.link} target="_blank" rel="noreferrer" className="text-xs font-bold uppercase tracking-wide text-yellow-400 hover:text-yellow-300">Read story →</a>
-                </div>
+            <article key={`${item.title}-${index}`} className="rounded-lg border border-white/10 bg-zinc-900 p-4">
+              <div className="mb-2 flex items-center gap-2">
+                <span className="rounded-md bg-amber-300/10 px-2 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-amber-200">{item.tag}</span>
+                <span className="text-xs text-zinc-500">{item.time}</span>
               </div>
+              <h4 className="text-sm font-bold leading-snug text-white">{item.title}</h4>
+              <p className="mb-3 mt-2 text-xs text-zinc-500">{item.source}</p>
+              <a href={item.link} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-xs font-black uppercase tracking-wide text-amber-300 hover:text-white">
+                Read story
+                <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
+              </a>
             </article>
           ))}
         </div>
-        {matchNewsLoading && <p className="text-xs text-slate-500 mt-3">Loading match news...</p>}
-        {!matchNewsLoading && relatedNews.length === 0 && <p className="text-xs text-slate-500">No match-specific stories found yet.</p>}
+        {matchNewsLoading && <p className="mt-3 text-xs text-zinc-500">Loading match news...</p>}
+        {!matchNewsLoading && relatedNews.length === 0 && <p className="text-xs text-zinc-500">No match-specific stories found yet.</p>}
       </section>
 
       <AdUnit slot={ADSENSE_SLOTS.TAB_BOTTOM_RECTANGLE} format="rectangle" />
