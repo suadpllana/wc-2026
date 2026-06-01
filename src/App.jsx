@@ -413,7 +413,6 @@ export default function WorldCup2026() {
       news: ["World Cup 2026 news, previews and analysis | WC2026.live", "Latest World Cup 2026 news, fixture updates, team stories, previews, injury reports, and analysis."],
       games: ["World Cup 2026 games: trivia quiz and guess the flag | WC2026.live", "Play free World Cup 2026 games: test your football knowledge with our trivia quiz and guess-the-flag challenge, then chase your high score."],
       scorers: ["World Cup 2026 top scorers and players to watch", "Track the Golden Boot race and the star players expected to shape World Cup 2026."],
-      about: ["About World Cup 2026 format, hosts and records", "World Cup 2026 tournament overview, host nations, format notes, records, and classic match history."],
     };
     const [title, description] = titles[activeTab] || titles.home;
     updateSeo({ title, description });
