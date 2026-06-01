@@ -1,6 +1,6 @@
 // Defaults to the site owner's AdSense publisher ID so ads work without env vars.
 // Override via VITE_ADSENSE_CLIENT if needed.
-export const ADSENSE_CLIENT = (import.meta.env.VITE_ADSENSE_CLIENT || "ca-pub-5325347113196186").trim();
+export const ADSENSE_CLIENT = (import.meta.env.VITE_ADSENSE_CLIENT || "ca-pub-8402742047549234").trim();
 
 export const ADSENSE_SLOTS = {
   TOP_BANNER: import.meta.env.VITE_ADSENSE_SLOT_TOP_BANNER || "",

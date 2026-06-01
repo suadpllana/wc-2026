@@ -67,7 +67,7 @@ function seoAssetsPlugin() {
       const siteOrigin = (env.VITE_SITE_ORIGIN || 'https://world-cup2026.netlify.app').replace(/\/$/, '')
       const outDir = resolve(process.cwd(), 'dist')
       writeFileSync(resolve(outDir, 'sitemap.xml'), buildSitemap(siteOrigin))
-      writeFileSync(resolve(outDir, 'ads.txt'), buildAdsTxt(env.VITE_ADSENSE_CLIENT || 'ca-pub-5325347113196186'))
+      writeFileSync(resolve(outDir, 'ads.txt'), buildAdsTxt(env.VITE_ADSENSE_CLIENT || 'ca-pub-8402742047549234'))
     },
   }
 }
