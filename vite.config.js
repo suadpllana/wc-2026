@@ -22,7 +22,7 @@ function isPlaceholderTeam(name = '') {
 }
 
 function buildSitemap(siteOrigin) {
-  const staticPaths = ['', 'fixtures', 'predictions', 'groups', 'news', 'games', 'scorers', 'about']
+  const staticPaths = ['', 'fixtures', 'predictions', 'groups', 'news', 'games', 'scorers', 'about', 'privacy']
   const urls = new Set(staticPaths.map((path) => `${siteOrigin}/${path}`.replace(/\/$/, '/')))
 
   const teams = new Set()

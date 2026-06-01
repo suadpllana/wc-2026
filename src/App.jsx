@@ -9,6 +9,7 @@ import HomeTab from "./components/tabs/HomeTab";
 import MatchDetailsTab from "./components/tabs/MatchDetailsTab";
 import NewsTab from "./components/tabs/NewsTab";
 import PredictionsTab from "./components/tabs/PredictionsTab";
+import PrivacyTab from "./components/tabs/PrivacyTab";
 import ScoresTab from "./components/tabs/ScoresTab";
 import ScorersTab from "./components/tabs/ScorersTab";
 import TeamDetailsTab from "./components/tabs/TeamDetailsTab";
@@ -61,6 +62,10 @@ function parseRouteFromLocation(pathname, search) {
     };
   }
 
+  if (root === "privacy") {
+    return { kind: "page", page: "privacy" };
+  }
+
   const tabId = normalizeTabId(TAB_PATH_TO_ID[root] ?? root ?? "home");
   return { kind: "tab", tab: TAB_ID_TO_PATH[tabId] !== undefined ? tabId : "home" };
 }
@@ -84,6 +89,10 @@ function parseCurrentRoute() {
 function getActiveTabFromRoute(route) {
   if (route.kind === "tab") {
     return route.tab;
+  }
+
+  if (route.kind === "page") {
+    return "";
   }
 
   const backRoot = cleanPath(route.backRoute || "").split("/")[0];
@@ -405,6 +414,14 @@ export default function WorldCup2026() {
 
     setRouteJsonLd(null);
 
+    if (route.kind === "page" && route.page === "privacy") {
+      updateSeo({
+        title: "Privacy Policy & Terms | WC2026.live",
+        description: "How WC2026.live handles data, cookies, and advertising, plus our affiliate disclosure and terms of use.",
+      });
+      return;
+    }
+
     const titles = {
       home: ["World Cup 2026 fixtures, predictions, odds and news | WC2026.live", "Live World Cup 2026 dashboard with fixtures, groups, predictions, estimated 1X2 odds, host cities, and breaking news."],
       scores: ["World Cup 2026 fixtures and match schedule | WC2026.live", "Every World Cup 2026 fixture, date, kickoff time, group, city, venue, and match detail link."],
@@ -574,6 +591,10 @@ export default function WorldCup2026() {
 
     if (route.kind === "tab" && activeTab === "about") {
       return <AboutTab />;
+    }
+
+    if (route.kind === "page" && route.page === "privacy") {
+      return <PrivacyTab />;
     }
 
     return null;
