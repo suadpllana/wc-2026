@@ -1,31 +1,31 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://wc2026.live/</loc>
+    <loc>https://world-cup2026.netlify.app/</loc>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://wc2026.live/fixtures</loc>
+    <loc>https://world-cup2026.netlify.app/fixtures</loc>
     <priority>0.95</priority>
   </url>
   <url>
-    <loc>https://wc2026.live/predictions</loc>
+    <loc>https://world-cup2026.netlify.app/predictions</loc>
     <priority>0.95</priority>
   </url>
   <url>
-    <loc>https://wc2026.live/groups</loc>
+    <loc>https://world-cup2026.netlify.app/groups</loc>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://wc2026.live/news</loc>
+    <loc>https://world-cup2026.netlify.app/news</loc>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://wc2026.live/scorers</loc>
+    <loc>https://world-cup2026.netlify.app/scorers</loc>
     <priority>0.75</priority>
   </url>
   <url>
-    <loc>https://wc2026.live/about</loc>
+    <loc>https://world-cup2026.netlify.app/about</loc>
     <priority>0.7</priority>
   </url>
 </urlset>

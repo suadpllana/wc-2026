@@ -3,6 +3,7 @@ import Footer from "./components/Footer";
 import HeaderNav from "./components/HeaderNav";
 import AdUnit from "./components/AdUnit";
 import AboutTab from "./components/tabs/AboutTab";
+import GamesTab from "./components/tabs/GamesTab";
 import GroupsTab from "./components/tabs/GroupsTab";
 import HomeTab from "./components/tabs/HomeTab";
 import MatchDetailsTab from "./components/tabs/MatchDetailsTab";
@@ -118,6 +119,41 @@ function updateSeo({ title, description }) {
     document.head.appendChild(canonical);
   }
   canonical.setAttribute("href", `${window.location.origin}${window.location.pathname}`);
+}
+
+// Injects (or clears) page-specific JSON-LD so match and team pages can earn rich
+// results in Google. A single managed <script> tag is reused across navigations.
+function setRouteJsonLd(data) {
+  const id = "wc2026-route-jsonld";
+  let script = document.getElementById(id);
+  if (!data) {
+    if (script) script.remove();
+    return;
+  }
+  if (!script) {
+    script = document.createElement("script");
+    script.type = "application/ld+json";
+    script.id = id;
+    document.head.appendChild(script);
+  }
+  script.textContent = JSON.stringify(data);
+}
+
+function buildMatchJsonLd(match) {
+  const canonicalUrl = `${window.location.origin}${window.location.pathname}`;
+  return {
+    "@context": "https://schema.org",
+    "@type": "SportsEvent",
+    name: `${match.home.name} vs ${match.away.name} — World Cup 2026`,
+    sport: "Association football",
+    startDate: match.isoDate || undefined,
+    eventStatus: "https://schema.org/EventScheduled",
+    homeTeam: { "@type": "SportsTeam", name: match.home.name },
+    awayTeam: { "@type": "SportsTeam", name: match.away.name },
+    location: { "@type": "Place", name: [match.venue, match.city].filter(Boolean).join(", ") || "TBD" },
+    superEvent: { "@type": "SportsEvent", name: "FIFA World Cup 2026" },
+    url: canonicalUrl,
+  };
 }
 
 export default function WorldCup2026() {
@@ -348,6 +384,7 @@ export default function WorldCup2026() {
         title: `${selectedMatch.home.name} vs ${selectedMatch.away.name} prediction, odds, fixture | World Cup 2026`,
         description: `World Cup 2026 ${selectedMatch.home.name} vs ${selectedMatch.away.name}: kickoff time, venue, news, 1X2 estimated odds, and match prediction.`,
       });
+      setRouteJsonLd(buildMatchJsonLd(selectedMatch));
       return;
     }
 
@@ -356,8 +393,17 @@ export default function WorldCup2026() {
         title: `${selectedTeam.name} World Cup 2026 fixtures, group, news | WC2026.live`,
         description: `${selectedTeam.name} World Cup 2026 team page with group table, upcoming fixtures, recent form, and latest news.`,
       });
+      setRouteJsonLd({
+        "@context": "https://schema.org",
+        "@type": "SportsTeam",
+        name: selectedTeam.name,
+        sport: "Association football",
+        url: `${window.location.origin}${window.location.pathname}`,
+      });
       return;
     }
+
+    setRouteJsonLd(null);
 
     const titles = {
       home: ["World Cup 2026 fixtures, predictions, odds and news | WC2026.live", "Live World Cup 2026 dashboard with fixtures, groups, predictions, estimated 1X2 odds, host cities, and breaking news."],
@@ -365,6 +411,7 @@ export default function WorldCup2026() {
       predictions: ["World Cup 2026 predictions and 1X2 odds for every match", "Model-based World Cup 2026 match predictions, both-teams-to-score leans, explanations, and estimated 1X2 odds for all 104 games."],
       groups: ["World Cup 2026 groups and standings | WC2026.live", "World Cup 2026 group tables, teams, flags, points, goal difference, and team profile links."],
       news: ["World Cup 2026 news, previews and analysis | WC2026.live", "Latest World Cup 2026 news, fixture updates, team stories, previews, injury reports, and analysis."],
+      games: ["World Cup 2026 games: trivia quiz and guess the flag | WC2026.live", "Play free World Cup 2026 games: test your football knowledge with our trivia quiz and guess-the-flag challenge, then chase your high score."],
       scorers: ["World Cup 2026 top scorers and players to watch", "Track the Golden Boot race and the star players expected to shape World Cup 2026."],
       about: ["About World Cup 2026 format, hosts and records", "World Cup 2026 tournament overview, host nations, format notes, records, and classic match history."],
     };
@@ -516,6 +563,10 @@ export default function WorldCup2026() {
 
     if (route.kind === "tab" && activeTab === "news") {
       return <NewsTab featuredNews={featuredNews} newsLoading={newsLoading} newsError={newsError} />;
+    }
+
+    if (route.kind === "tab" && activeTab === "games") {
+      return <GamesTab />;
     }
 
     if (route.kind === "tab" && activeTab === "scorers") {

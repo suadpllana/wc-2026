@@ -22,7 +22,7 @@ export default function Footer() {
 
           {[
             { title: "Tournament", links: [["Fixtures", "/fixtures"], ["Predictions", "/predictions"], ["Groups", "/groups"], ["Top Scorers", "/scorers"]] },
-            { title: "Coverage", links: [["Latest News", "/news"], ["Match Previews", "/predictions"], ["Team Pages", "/groups"], ["About", "/about"]] },
+            { title: "Coverage", links: [["Latest News", "/news"], ["Games", "/games"], ["Match Previews", "/predictions"], ["About", "/about"]] },
             { title: "Legal", links: [["Privacy Policy", "/about"], ["Terms", "/about"], ["Contact", "/about"], ["Sitemap", "/sitemap.xml"]] },
           ].map((column) => (
             <div key={column.title}>

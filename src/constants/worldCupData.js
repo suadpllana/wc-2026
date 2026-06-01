@@ -1,4 +1,6 @@
-export const ADSENSE_CLIENT = import.meta.env.VITE_ADSENSE_CLIENT || "";
+// Defaults to the site owner's AdSense publisher ID so ads work without env vars.
+// Override via VITE_ADSENSE_CLIENT if needed.
+export const ADSENSE_CLIENT = (import.meta.env.VITE_ADSENSE_CLIENT || "ca-pub-5325347113196186").trim();
 
 export const ADSENSE_SLOTS = {
   TOP_BANNER: import.meta.env.VITE_ADSENSE_SLOT_TOP_BANNER || "",
@@ -15,16 +17,36 @@ export const BETTING_SPONSORS = [
     name: "Stake",
     url: import.meta.env.VITE_STAKE_AFFILIATE_URL || "https://stake.com",
     label: "Featured sportsbook",
+    offer: "Crypto bonus on World Cup markets",
     accentClass: "from-emerald-400 to-lime-300",
+  },
+  {
+    id: "rainbet",
+    name: "Rainbet",
+    url: import.meta.env.VITE_RAINBET_AFFILIATE_URL || "https://rainbet.com",
+    label: "Crypto casino & sportsbook",
+    offer: "Welcome bonus + rakeback",
+    accentClass: "from-indigo-400 to-violet-300",
   },
   {
     id: "1xbet",
     name: "1xBet",
     url: import.meta.env.VITE_1XBET_AFFILIATE_URL || "https://1xbet.com",
     label: "Match odds partner",
+    offer: "Up to €130 welcome bonus",
     accentClass: "from-sky-400 to-cyan-300",
   },
+  {
+    id: "betano",
+    name: "Betano",
+    url: import.meta.env.VITE_BETANO_AFFILIATE_URL || "https://www.betano.com",
+    label: "Odds boosts & live betting",
+    offer: "Bet boosts on every match",
+    accentClass: "from-orange-400 to-amber-300",
+  },
 ];
+
+export const RESPONSIBLE_GAMBLING_URL = "https://www.begambleaware.org";
 
 export const TABS = [
   { id: "home", label: "Home", path: "" },
@@ -32,6 +54,7 @@ export const TABS = [
   { id: "predictions", label: "Predictions", path: "predictions" },
   { id: "groups", label: "Groups", path: "groups" },
   { id: "news", label: "News", path: "news" },
+  { id: "games", label: "Games", path: "games" },
   { id: "scorers", label: "Top Scorers", path: "scorers" },
   { id: "about", label: "About", path: "about" },
 ];

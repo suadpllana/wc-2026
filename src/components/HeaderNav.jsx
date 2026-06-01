@@ -1,4 +1,4 @@
-import { BarChart3, CalendarDays, Home, Newspaper, Sparkles, Table2, Trophy } from "lucide-react";
+import { BarChart3, CalendarDays, Gamepad2, Home, Newspaper, Sparkles, Table2, Trophy } from "lucide-react";
 
 const tabIcons = {
   home: Home,
@@ -6,6 +6,7 @@ const tabIcons = {
   predictions: Sparkles,
   groups: Table2,
   news: Newspaper,
+  games: Gamepad2,
   scorers: BarChart3,
   about: Trophy,
 };
